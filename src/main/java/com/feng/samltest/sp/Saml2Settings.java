@@ -3,7 +3,7 @@ package com.feng.samltest.sp;
 import com.feng.samltest.constant.NameIdFormatsEnum;
 import com.feng.samltest.constant.SamlBindingEnum;
 import com.feng.samltest.constant.SamlConstants;
-import com.feng.samltest.util.SamlXmlUtils;
+import com.feng.samltest.util.SamlXmlTool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -1061,11 +1061,11 @@ public class Saml2Settings {
 
         metadataString = metadataString.replace("<?xml version=\"1.0\"?>", "");
 
-        Document metadataDocument = SamlXmlUtils.loadXML(metadataString);
+        Document metadataDocument = SamlXmlTool.loadXML(metadataString);
 
         List<String> errors = new ArrayList<>();
 
-        if (!SamlXmlUtils.validateXML(metadataDocument, SchemaFactory.SAML_SCHEMA_METADATA_2_0)) {
+        if (!SamlXmlTool.validateXML(metadataDocument, SchemaFactory.SAML_SCHEMA_METADATA_2_0)) {
             errors.add("Invalid SAML Metadata. Not match the saml-schema-metadata-2.0.xsd");
         } else {
             Element rootElement = metadataDocument.getDocumentElement();
@@ -1086,9 +1086,9 @@ public class Saml2Settings {
                         validUntil = rootElement.getAttribute("validUntil");
                     }
 
-                    long expireTime = SamlXmlUtils.getExpireTime(cacheDuration, validUntil);
+                    long expireTime = SamlXmlTool.getExpireTime(cacheDuration, validUntil);
 
-                    if (expireTime != 0 && SamlXmlUtils.getCurrentTimeStamp() > expireTime) {
+                    if (expireTime != 0 && SamlXmlTool.getCurrentTimeStamp() > expireTime) {
                         errors.add("expired_xml");
                     }
                 }

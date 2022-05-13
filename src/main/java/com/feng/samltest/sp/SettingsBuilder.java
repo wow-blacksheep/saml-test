@@ -1,7 +1,7 @@
 package com.feng.samltest.sp;
 
 import com.feng.samltest.constant.SamlConstants;
-import com.feng.samltest.util.SamlXmlUtils;
+import com.feng.samltest.util.SamlXmlTool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -147,7 +147,7 @@ public class SettingsBuilder {
         if (StringUtils.isNotEmpty(uniqueIdPrefix)) {
             saml2Setting.setUniqueIDPrefix(uniqueIdPrefix);
         } else if (saml2Setting.getUniqueIDPrefix() == null) {
-            saml2Setting.setUniqueIDPrefix(SamlXmlUtils.UNIQUE_ID_PREFIX);
+            saml2Setting.setUniqueIDPrefix(SamlXmlTool.UNIQUE_ID_PREFIX);
         }
 
         return saml2Setting;
@@ -747,7 +747,7 @@ public class SettingsBuilder {
 
         if (isString(propValue)) {
             try {
-                return SamlXmlUtils.loadCert(((String) propValue).trim());
+                return SamlXmlTool.loadCert(((String) propValue).trim());
             } catch (CertificateException e) {
                 log.error("Saml Error loading certificate from properties.", e);
                 return null;
@@ -838,7 +838,7 @@ public class SettingsBuilder {
 
         if (isString(propValue)) {
             try {
-                return SamlXmlUtils.loadPrivateKey(((String) propValue).trim());
+                return SamlXmlTool.loadPrivateKey(((String) propValue).trim());
             } catch (Exception e) {
                 log.error("Saml Error loading privatekey from properties.", e);
                 return null;

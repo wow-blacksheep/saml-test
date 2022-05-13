@@ -1,7 +1,7 @@
 package com.feng.samltest.sp;
 
 import com.feng.samltest.constant.SamlConstants;
-import com.feng.samltest.util.SamlXmlUtils;
+import com.feng.samltest.util.SamlXmlTool;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.xml.security.exceptions.XMLSecurityException;
@@ -126,10 +126,10 @@ public class Metadata {
         Map<String, String> valueMap = new HashMap<String, String>();
         Boolean wantsEncrypted = settings.getWantAssertionsEncrypted() || settings.getWantNameIdEncrypted();
 
-        valueMap.put("id", SamlXmlUtils.toXml(SamlXmlUtils.generateUniqueID(settings.getUniqueIDPrefix())));
+        valueMap.put("id", SamlXmlTool.toXml(SamlXmlTool.generateUniqueID(settings.getUniqueIDPrefix())));
         String validUntilTimeStr = "";
         if (validUntilTime != null) {
-            String validUntilTimeValue = SamlXmlUtils.formatDateTime(validUntilTime.getTimeInMillis());
+            String validUntilTimeValue = SamlXmlTool.formatDateTime(validUntilTime.getTimeInMillis());
             validUntilTimeStr = " validUntil=\"" + validUntilTimeValue + "\"";
         }
         valueMap.put("validUntilTimeStr", validUntilTimeStr);
@@ -141,12 +141,12 @@ public class Metadata {
         }
         valueMap.put("cacheDurationStr", cacheDurationStr);
 
-        valueMap.put("spEntityId", SamlXmlUtils.toXml(settings.getSpEntityId()));
+        valueMap.put("spEntityId", SamlXmlTool.toXml(settings.getSpEntityId()));
         valueMap.put("strAuthnsign", String.valueOf(settings.getAuthnRequestsSigned()));
         valueMap.put("strWsign", String.valueOf(settings.getWantAssertionsSigned()));
-        valueMap.put("spNameIDFormat", SamlXmlUtils.toXml(settings.getSpNameIDFormat()));
-        valueMap.put("spAssertionConsumerServiceBinding", SamlXmlUtils.toXml(settings.getSpAssertionConsumerServiceBinding()));
-        valueMap.put("spAssertionConsumerServiceUrl", SamlXmlUtils.toXml(settings.getSpAssertionConsumerServiceUrl().toString()));
+        valueMap.put("spNameIDFormat", SamlXmlTool.toXml(settings.getSpNameIDFormat()));
+        valueMap.put("spAssertionConsumerServiceBinding", SamlXmlTool.toXml(settings.getSpAssertionConsumerServiceBinding()));
+        valueMap.put("spAssertionConsumerServiceUrl", SamlXmlTool.toXml(settings.getSpAssertionConsumerServiceUrl().toString()));
         valueMap.put("sls", toSLSXml(settings.getSpSingleLogoutServiceUrl(), settings.getSpSingleLogoutServiceBinding()));
 
         valueMap.put("strAttributeConsumingService", getAttributeConsumingServiceXml());
@@ -198,10 +198,10 @@ public class Metadata {
 
             attributeConsumingServiceXML.append("<md:AttributeConsumingService index=\"1\">");
             if (serviceName != null && !serviceName.isEmpty()) {
-                attributeConsumingServiceXML.append("<md:ServiceName xml:lang=\"en\">" + SamlXmlUtils.toXml(serviceName) + "</md:ServiceName>");
+                attributeConsumingServiceXML.append("<md:ServiceName xml:lang=\"en\">" + SamlXmlTool.toXml(serviceName) + "</md:ServiceName>");
             }
             if (serviceDescription != null && !serviceDescription.isEmpty()) {
-                attributeConsumingServiceXML.append("<md:ServiceDescription xml:lang=\"en\">" + SamlXmlUtils.toXml(serviceDescription) + "</md:ServiceDescription>");
+                attributeConsumingServiceXML.append("<md:ServiceDescription xml:lang=\"en\">" + SamlXmlTool.toXml(serviceDescription) + "</md:ServiceDescription>");
             }
             if (requestedAttributes != null && !requestedAttributes.isEmpty()) {
                 for (RequestedAttribute requestedAttribute : requestedAttributes) {
@@ -214,15 +214,15 @@ public class Metadata {
                     String contentStr = "<md:RequestedAttribute";
 
                     if (name != null && !name.isEmpty()) {
-                        contentStr += " Name=\"" + SamlXmlUtils.toXml(name) + "\"";
+                        contentStr += " Name=\"" + SamlXmlTool.toXml(name) + "\"";
                     }
 
                     if (nameFormat != null && !nameFormat.isEmpty()) {
-                        contentStr += " NameFormat=\"" + SamlXmlUtils.toXml(nameFormat) + "\"";
+                        contentStr += " NameFormat=\"" + SamlXmlTool.toXml(nameFormat) + "\"";
                     }
 
                     if (friendlyName != null && !friendlyName.isEmpty()) {
-                        contentStr += " FriendlyName=\"" + SamlXmlUtils.toXml(friendlyName) + "\"";
+                        contentStr += " FriendlyName=\"" + SamlXmlTool.toXml(friendlyName) + "\"";
                     }
 
                     if (isRequired != null) {
@@ -232,7 +232,7 @@ public class Metadata {
                     if (attrValues != null && !attrValues.isEmpty()) {
                         contentStr += ">";
                         for (String attrValue : attrValues) {
-                            contentStr += "<saml:AttributeValue xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">" + SamlXmlUtils.toXml(attrValue) + "</saml:AttributeValue>";
+                            contentStr += "<saml:AttributeValue xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\">" + SamlXmlTool.toXml(attrValue) + "</saml:AttributeValue>";
                         }
                         attributeConsumingServiceXML.append(contentStr + "</md:RequestedAttribute>");
                     } else {
@@ -256,22 +256,22 @@ public class Metadata {
         StringBuilder contactsXml = new StringBuilder();
 
         for (Contact contact : contacts) {
-            contactsXml.append("<md:ContactPerson contactType=\"" + SamlXmlUtils.toXml(contact.getContactType()) + "\">");
+            contactsXml.append("<md:ContactPerson contactType=\"" + SamlXmlTool.toXml(contact.getContactType()) + "\">");
             final String company = contact.getCompany();
             if (company != null)
-                contactsXml.append("<md:Company>" + SamlXmlUtils.toXml(company) + "</md:Company>");
+                contactsXml.append("<md:Company>" + SamlXmlTool.toXml(company) + "</md:Company>");
             final String givenName = contact.getGivenName();
             if (givenName != null)
-                contactsXml.append("<md:GivenName>" + SamlXmlUtils.toXml(givenName) + "</md:GivenName>");
+                contactsXml.append("<md:GivenName>" + SamlXmlTool.toXml(givenName) + "</md:GivenName>");
             final String surName = contact.getSurName();
             if (surName != null)
-                contactsXml.append("<md:SurName>" + SamlXmlUtils.toXml(surName) + "</md:SurName>");
+                contactsXml.append("<md:SurName>" + SamlXmlTool.toXml(surName) + "</md:SurName>");
             final List<String> emailAddresses = contact.getEmailAddresses();
             emailAddresses.forEach(emailAddress -> contactsXml
-                    .append("<md:EmailAddress>" + SamlXmlUtils.toXml(emailAddress) + "</md:EmailAddress>"));
+                    .append("<md:EmailAddress>" + SamlXmlTool.toXml(emailAddress) + "</md:EmailAddress>"));
             final List<String> telephoneNumbers = contact.getTelephoneNumbers();
             telephoneNumbers.forEach(telephoneNumber -> contactsXml
-                    .append("<md:TelephoneNumber>" + SamlXmlUtils.toXml(telephoneNumber) + "</md:TelephoneNumber>"));
+                    .append("<md:TelephoneNumber>" + SamlXmlTool.toXml(telephoneNumber) + "</md:TelephoneNumber>"));
             contactsXml.append("</md:ContactPerson>");
         }
 
@@ -289,10 +289,10 @@ public class Metadata {
 
         if (organization != null) {
             String lang = organization.getOrgLangAttribute();
-            orgXml = "<md:Organization><md:OrganizationName xml:lang=\"" + SamlXmlUtils.toXml(lang) + "\">" + SamlXmlUtils.toXml(organization.getOrgName())
-                    + "</md:OrganizationName><md:OrganizationDisplayName xml:lang=\"" + SamlXmlUtils.toXml(lang) + "\">"
-                    + SamlXmlUtils.toXml(organization.getOrgDisplayName()) + "</md:OrganizationDisplayName><md:OrganizationURL xml:lang=\""
-                    + SamlXmlUtils.toXml(lang) + "\">" + SamlXmlUtils.toXml(organization.getOrgUrl()) + "</md:OrganizationURL></md:Organization>";
+            orgXml = "<md:Organization><md:OrganizationName xml:lang=\"" + SamlXmlTool.toXml(lang) + "\">" + SamlXmlTool.toXml(organization.getOrgName())
+                    + "</md:OrganizationName><md:OrganizationDisplayName xml:lang=\"" + SamlXmlTool.toXml(lang) + "\">"
+                    + SamlXmlTool.toXml(organization.getOrgDisplayName()) + "</md:OrganizationDisplayName><md:OrganizationURL xml:lang=\""
+                    + SamlXmlTool.toXml(lang) + "\">" + SamlXmlTool.toXml(organization.getOrgUrl()) + "</md:OrganizationURL></md:Organization>";
         }
         return orgXml;
     }
@@ -356,8 +356,8 @@ public class Metadata {
         StringBuilder slsXml = new StringBuilder();
 
         if (spSingleLogoutServiceUrl != null) {
-            slsXml.append("<md:SingleLogoutService Binding=\"" + SamlXmlUtils.toXml(spSingleLogoutServiceBinding) + "\"");
-            slsXml.append(" Location=\"" + SamlXmlUtils.toXml(spSingleLogoutServiceUrl.toString()) + "\"/>");
+            slsXml.append("<md:SingleLogoutService Binding=\"" + SamlXmlTool.toXml(spSingleLogoutServiceBinding) + "\"");
+            slsXml.append(" Location=\"" + SamlXmlTool.toXml(spSingleLogoutServiceUrl.toString()) + "\"/>");
         }
         return slsXml.toString();
     }
@@ -397,8 +397,8 @@ public class Metadata {
      * @throws XPathExpressionException
      */
     public static String signMetadata(String metadata, PrivateKey key, X509Certificate cert, String signAlgorithm, String digestAlgorithm) throws XPathExpressionException, XMLSecurityException {
-        Document metadataDoc = SamlXmlUtils.loadXML(metadata);
-        String signedMetadata = SamlXmlUtils.addSign(metadataDoc, key, cert, signAlgorithm, digestAlgorithm);
+        Document metadataDoc = SamlXmlTool.loadXML(metadata);
+        String signedMetadata = SamlXmlTool.addSign(metadataDoc, key, cert, signAlgorithm, digestAlgorithm);
         LOGGER.debug("Signed metadata --> " + signedMetadata);
         return signedMetadata;
     }

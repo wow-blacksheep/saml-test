@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://samqas.whchem.com/isammmps/sps/samlmmps/saml20">
+<md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+<md:KeyDescriptor use="signing">
+<KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+<X509Data>
+<X509Certificate>MIIB5TCCAU6gAwIBAgIIR5u2uWh1hKYwDQYJKoZIhvcNAQELBQAwEzERMA8GA1UEAxMIVUFQUUFTMDEwHhcNMTgxMDA5MDMyNTIyWhcNMzgxMDI1MDMyNTIyWjATMREwDwYDVQQDEwhVQVBRQVMwMTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwcusMfsuBByWZHYvDzoW/k/bGYkDZ88L29OQrc2N0lhMw6nw/xDZ/NtCam+wVDoaXD3XmtJIVYVIVacVX+cN5I0i42IdTCEMaE+BdNL5UnHC2rLA2YZjTaFN1QQkTyJTJH/7rH4LWAx4UHleBrtcg0uycPpY89wKrlbCc7A7eWcCAwEAAaNCMEAwHQYDVR0OBBYEFPn0HRbBbwNYdFwJj7QDTwsy4+w4MB8GA1UdIwQYMBaAFPn0HRbBbwNYdFwJj7QDTwsy4+w4MA0GCSqGSIb3DQEBCwUAA4GBAChX+TnLUQSwzFnifLoyhntq6zmk6IPQvA9PDQB2EWVhbTVh8zQPUlGaRVJFzdDAKTZq1Oi4YJ4BQWvKojeGtaGwghi7NVXZkPB0YBsEjxim8tTzBLlG7tWxu6aL/+a6ETUy6kxMo9oE7II2xXPt0zruL2l2YtvjF8zvEyGnu4X5</X509Certificate>
+</X509Data>
+</KeyInfo>
+</md:KeyDescriptor>
+<md:KeyDescriptor use="encryption">
+<KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+<X509Data>
+<X509Certificate>MIIB5TCCAU6gAwIBAgIIR5u2uWh1hKYwDQYJKoZIhvcNAQELBQAwEzERMA8GA1UEAxMIVUFQUUFTMDEwHhcNMTgxMDA5MDMyNTIyWhcNMzgxMDI1MDMyNTIyWjATMREwDwYDVQQDEwhVQVBRQVMwMTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAwcusMfsuBByWZHYvDzoW/k/bGYkDZ88L29OQrc2N0lhMw6nw/xDZ/NtCam+wVDoaXD3XmtJIVYVIVacVX+cN5I0i42IdTCEMaE+BdNL5UnHC2rLA2YZjTaFN1QQkTyJTJH/7rH4LWAx4UHleBrtcg0uycPpY89wKrlbCc7A7eWcCAwEAAaNCMEAwHQYDVR0OBBYEFPn0HRbBbwNYdFwJj7QDTwsy4+w4MB8GA1UdIwQYMBaAFPn0HRbBbwNYdFwJj7QDTwsy4+w4MA0GCSqGSIb3DQEBCwUAA4GBAChX+TnLUQSwzFnifLoyhntq6zmk6IPQvA9PDQB2EWVhbTVh8zQPUlGaRVJFzdDAKTZq1Oi4YJ4BQWvKojeGtaGwghi7NVXZkPB0YBsEjxim8tTzBLlG7tWxu6aL/+a6ETUy6kxMo9oE7II2xXPt0zruL2l2YtvjF8zvEyGnu4X5</X509Certificate>
+</X509Data>
+</KeyInfo>
+<md:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"/>
+</md:KeyDescriptor>
+<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://samqas.whchem.com/isammmps/sps/samlmmps/saml20/slo"/>
+<md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://samqas.whchem.com/isammmps/sps/samlmmps/saml20/slo"/>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+<md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
+<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://samqas.whchem.com/isammmps/sps/samlmmps/saml20/login"/>
+<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://samqas.whchem.com/isammmps/sps/samlmmps/saml20/login"/>
+</md:IDPSSODescriptor>
+<md:Organization>
+<md:OrganizationName xml:lang="en">whidp</md:OrganizationName>
+<md:OrganizationDisplayName xml:lang="en">whidp</md:OrganizationDisplayName>
+<md:OrganizationURL xml:lang="en"/>
+</md:Organization>
+</md:EntityDescriptor>

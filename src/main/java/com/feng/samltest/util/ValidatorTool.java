@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * The type Validator utils.
  */
-public class ValidatorUtils {
+public class ValidatorTool {
 
     /**
      * Validate response.

@@ -7,7 +7,7 @@ import com.feng.samltest.constant.SamlConstants;
 import com.feng.samltest.dto.SamlLogoutResponse;
 import com.feng.samltest.dto.SamlResponse;
 import com.feng.samltest.exception.SamlException;
-import com.feng.samltest.util.ValidatorUtils;
+import com.feng.samltest.util.ValidatorTool;
 import com.feng.samltest.util.XMLHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.shibboleth.utilities.java.support.component.ComponentInitializationException;
@@ -265,7 +265,7 @@ public class SamlClient {
             throw new SamlException("Saml Cannot decrypt the assertion", e);
         }
         //检验响应 (断言 / 签名 / 约束)
-        ValidatorUtils.validate(response, responseIssuer, credentials, this.now, notBeforeSkew);
+        ValidatorTool.validate(response, responseIssuer, credentials, this.now, notBeforeSkew);
 
         Assertion assertion = response.getAssertions().get(0);
         return new SamlResponse(assertion);
@@ -468,7 +468,7 @@ public class SamlClient {
         // 将字符串解析为 登出xml响应对象
         LogoutResponse logoutResponse = (LogoutResponse) parseResponse(encodedResponse, method);
         // 验证
-        ValidatorUtils.validate(logoutResponse, responseIssuer, credentials);
+        ValidatorTool.validate(logoutResponse, responseIssuer, credentials);
 
         return new SamlLogoutResponse(logoutResponse.getStatus());
     }
@@ -486,7 +486,7 @@ public class SamlClient {
         // 解码 request
         LogoutRequest logoutRequest = (LogoutRequest) parseResponse(encodedRequest, method);
         // 校验
-        ValidatorUtils.validate(logoutRequest, responseIssuer, credentials, nameID);
+        ValidatorTool.validate(logoutRequest, responseIssuer, credentials, nameID);
     }
 
     /**

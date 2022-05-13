@@ -1,5 +1,12 @@
-<form action="http://192.168.18.129:8080/auth/realms/dt/protocol/saml" method="post">
-    <p>SAMLRequest: <input type="text" name="SAMLRequest" /></p>
-    <p>RelayState: <input type="text" name="RelayState" /></p>
-    <input type="submit" value="Submit" />
+﻿<!--<form action="http://192.168.18.129:8080/auth/realms/dt/protocol/saml" method="post">-->
+<form action="https://samqas.whchem.com/isammmps/sps/samlmmps/saml20/login" method="post">
+    <p>SAMLRequest: <input type="text" name="SAMLRequest"/></p>
+    <p>RelayState: <input type="text" name="RelayState"/></p>
+    <input type="submit" value="Submit"/>
+</form>
+
+
+<form action="upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="fileUpload" ><br>
+    <input type="submit" value="commit"> <!--这是表单提交部分-->
 </form>

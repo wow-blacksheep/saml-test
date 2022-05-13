@@ -59,16 +59,14 @@ import java.util.zip.Inflater;
 
 
 /**
- * Util class of OneLogin's Java Toolkit.
- * <p>
  * A class that contains several auxiliary methods related to the SAML protocol
  */
-public final class SamlXmlUtils {
+public final class SamlXmlTool {
 
     /**
      * Private property to construct a logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SamlXmlUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SamlXmlTool.class);
 
     private static final DateTimeFormatter DATE_TIME_FORMAT = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
     private static final DateTimeFormatter DATE_TIME_FORMAT_MILLS = ISODateTimeFormat.dateTime().withZoneUTC();
@@ -85,7 +83,7 @@ public final class SamlXmlUtils {
         org.apache.xml.security.Init.init();
     }
 
-    private SamlXmlUtils() {
+    private SamlXmlTool() {
         //not called
     }
 
@@ -380,7 +378,7 @@ public final class SamlXmlUtils {
             XMLUtils.outputDOM(doc, baos);
         }
 
-        return SamlXmlUtils.toStringUtf8(baos.toByteArray());
+        return SamlXmlTool.toStringUtf8(baos.toByteArray());
     }
 
     /**
@@ -899,7 +897,7 @@ public final class SamlXmlUtils {
                 throw new Exception(sigMethodAlg + " is not a valid supported algorithm");
             }
 
-            if (SamlXmlUtils.mustRejectDeprecatedSignatureAlgo(sigMethodAlg, rejectDeprecatedAlg)) {
+            if (SamlXmlTool.mustRejectDeprecatedSignatureAlgo(sigMethodAlg, rejectDeprecatedAlg)) {
                 return signatureData;
             }
 
@@ -1206,18 +1204,18 @@ public final class SamlXmlUtils {
         document.setXmlStandalone(false);
 
         // If Issuer, locate Signature after Issuer, Otherwise as first child.
-        NodeList issuerNodes = SamlXmlUtils.query(document, "//saml:Issuer", null);
+        NodeList issuerNodes = SamlXmlTool.query(document, "//saml:Issuer", null);
         Element elemToSign = null;
         if (issuerNodes.getLength() > 0) {
             Node issuer = issuerNodes.item(0);
             root.insertBefore(sig.getElement(), issuer.getNextSibling());
             elemToSign = (Element) issuer.getParentNode();
         } else {
-            NodeList entitiesDescriptorNodes = SamlXmlUtils.query(document, "//md:EntitiesDescriptor", null);
+            NodeList entitiesDescriptorNodes = SamlXmlTool.query(document, "//md:EntitiesDescriptor", null);
             if (entitiesDescriptorNodes.getLength() > 0) {
                 elemToSign = (Element) entitiesDescriptorNodes.item(0);
             } else {
-                NodeList entityDescriptorNodes = SamlXmlUtils.query(document, "//md:EntityDescriptor", null);
+                NodeList entityDescriptorNodes = SamlXmlTool.query(document, "//md:EntityDescriptor", null);
                 if (entityDescriptorNodes.getLength() > 0) {
                     elemToSign = (Element) entityDescriptorNodes.item(0);
                 } else {
@@ -1365,11 +1363,11 @@ public final class SamlXmlUtils {
      */
     public static SamlResponseStatus getStatus(String statusXpath, Document dom) throws SamlException {
         try {
-            NodeList statusEntry = SamlXmlUtils.query(dom, statusXpath, null);
+            NodeList statusEntry = SamlXmlTool.query(dom, statusXpath, null);
             if (statusEntry.getLength() != 1) {
                 throw new SamlException("Missing Status on response");
             }
-            NodeList codeEntry = SamlXmlUtils.query(dom, statusXpath + "/samlp:StatusCode", (Element) statusEntry.item(0));
+            NodeList codeEntry = SamlXmlTool.query(dom, statusXpath + "/samlp:StatusCode", (Element) statusEntry.item(0));
 
             if (codeEntry.getLength() == 0) {
                 throw new SamlException("Missing Status Code on response");
@@ -1377,13 +1375,13 @@ public final class SamlXmlUtils {
             String stausCode = codeEntry.item(0).getAttributes().getNamedItem("Value").getNodeValue();
             SamlResponseStatus status = new SamlResponseStatus(stausCode);
 
-            NodeList subStatusCodeEntry = SamlXmlUtils.query(dom, statusXpath + "/samlp:StatusCode/samlp:StatusCode", (Element) statusEntry.item(0));
+            NodeList subStatusCodeEntry = SamlXmlTool.query(dom, statusXpath + "/samlp:StatusCode/samlp:StatusCode", (Element) statusEntry.item(0));
             if (subStatusCodeEntry.getLength() > 0) {
                 String subStatusCode = subStatusCodeEntry.item(0).getAttributes().getNamedItem("Value").getNodeValue();
                 status.setSubStatusCode(subStatusCode);
             }
 
-            NodeList messageEntry = SamlXmlUtils.query(dom, statusXpath + "/samlp:StatusMessage", (Element) statusEntry.item(0));
+            NodeList messageEntry = SamlXmlTool.query(dom, statusXpath + "/samlp:StatusMessage", (Element) statusEntry.item(0));
             if (messageEntry.getLength() == 1) {
                 status.setStatusMessage(messageEntry.item(0).getTextContent());
             }
@@ -1518,7 +1516,7 @@ public final class SamlXmlUtils {
      */
     public static String generateUniqueID(String prefix) {
         if (prefix == null || StringUtils.isEmpty(prefix)) {
-            prefix = SamlXmlUtils.UNIQUE_ID_PREFIX;
+            prefix = SamlXmlTool.UNIQUE_ID_PREFIX;
         }
         return prefix + UUID.randomUUID();
     }
@@ -1597,7 +1595,7 @@ public final class SamlXmlUtils {
             }
 
             if (validUntil != null && !StringUtils.isEmpty(validUntil)) {
-                DateTime dt = SamlXmlUtils.parseDateTime(validUntil);
+                DateTime dt = SamlXmlTool.parseDateTime(validUntil);
                 long validUntilTimeInt = dt.getMillis() / 1000;
                 if (expireTime == 0 || expireTime > validUntilTimeInt) {
                     expireTime = validUntilTimeInt;
