@@ -26,7 +26,7 @@ public enum NameIdFormatsEnum {
         this.format = format;
     }
 
-    public String getFormatByAlias(String alias) {
+    public static String getFormatByAlias(String alias) {
         for (NameIdFormatsEnum value : NameIdFormatsEnum.values()) {
             if (value.alias.equalsIgnoreCase(alias)) {
                 return value.format;

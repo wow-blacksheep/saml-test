@@ -482,7 +482,7 @@ public class Saml2Settings {
      *
      * @param spX509cert the spX509cert value to be set in X509Certificate format
      */
-    protected final void setSpX509cert(X509Certificate spX509cert) {
+    public final void setSpX509cert(X509Certificate spX509cert) {
         this.spX509cert = spX509cert;
     }
 

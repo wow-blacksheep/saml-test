@@ -48,6 +48,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -1687,5 +1688,17 @@ public final class SamlXmlTool {
 
     private static byte[] toBytesUtf8(String str) {
         return str.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static Certificate getCertificate(String crtString) throws CertificateException {
+        crtString = crtString.replace("-----BEGIN CERTIFICATE-----", "")
+                .replace("-----END CERTIFICATE-----", "")
+                .replace("\n", "");
+        java.util.Base64.Decoder decoder = java.util.Base64.getDecoder();
+        byte[] decodedData = decoder.decode(crtString);
+        InputStream inputStream = new ByteArrayInputStream(decodedData);
+
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        return certFactory.generateCertificate(inputStream);
     }
 }

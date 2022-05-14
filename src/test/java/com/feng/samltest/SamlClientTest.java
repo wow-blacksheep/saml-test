@@ -242,7 +242,7 @@ public class SamlClientTest {
     @Test
     public void decodeAndValidateSamlResponseWorksWithCertsNotIncludedInMetadata() throws Throwable {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        Certificate crt = cf.generateCertificate(SamlClientTest.class.getResourceAsStream("hub.crt"));
+        Certificate crt = cf.generateCertificate(SamlClientTest.class.getResourceAsStream("/hub.crt"));
         ArrayList<X509Certificate> certificates = new ArrayList<>();
         certificates.add((X509Certificate) crt);
 

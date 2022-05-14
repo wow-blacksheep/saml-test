@@ -1,14 +1,14 @@
 package com.feng.samltest.controller;
 
+import com.feng.samltest.constant.NameIdFormatsEnum;
 import com.feng.samltest.exception.SamlException;
 import com.feng.samltest.service.SamlClient;
+import com.feng.samltest.sp.Saml2Settings;
+import com.feng.samltest.sp.SettingsBuilder;
 import com.feng.samltest.util.SamlXmlTool;
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -16,9 +16,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import static com.feng.samltest.constant.NameIdFormatsEnum.UN_SPECIFIED;
 import static com.feng.samltest.constant.SamlBindingEnum.HTTP_POST;
+import static com.feng.samltest.sp.SettingsBuilder.*;
 
 @Controller
 public class MyController {
@@ -62,4 +66,29 @@ public class MyController {
         return "login.html";
     }
 
+    @GetMapping(value = "spMetadata", produces = MediaType.APPLICATION_XML_VALUE)
+    @ResponseBody
+    public String getSpMetadata(@RequestParam("redirectUrl") String redirectUrl,
+                                @RequestParam(value = "spEntityId",required = false) String spEntityId,
+                                @RequestParam("logoutUrl") String logoutUrl,
+                                @RequestParam("nameIdFormatType") String nameIdFormatType) throws CertificateEncodingException, SamlException {
+
+        Map<String, Object> samlData = new LinkedHashMap<>();
+        samlData.put(SP_ENTITYID_PROPERTY_KEY, null == spEntityId ? redirectUrl : spEntityId);
+        samlData.put(SP_ASSERTION_CONSUMER_SERVICE_URL_PROPERTY_KEY, redirectUrl);
+        samlData.put(SP_SINGLE_LOGOUT_SERVICE_URL_PROPERTY_KEY, logoutUrl);
+        samlData.put(SP_NAMEIDFORMAT_PROPERTY_KEY, NameIdFormatsEnum.getFormatByAlias(nameIdFormatType));
+        samlData.put(SP_ASSERTION_CONSUMER_SERVICE_BINDING_PROPERTY_KEY, HTTP_POST.getFormat());
+        samlData.put(SP_SINGLE_LOGOUT_SERVICE_BINDING_PROPERTY_KEY, HTTP_POST.getFormat());
+        samlData.put(SECURITY_AUTHREQUEST_SIGNED, "true");
+
+        Saml2Settings settings = new SettingsBuilder()
+                .setSamlData(samlData)
+                .build();
+
+        String file = this.getClass().getResource("/saml-public-key-supos.crt").getFile();
+        X509Certificate x509Certificate = new SamlClient().loadCertificate(file);
+        settings.setSpX509cert(x509Certificate);
+        return settings.getSPMetadata();
+    }
 }

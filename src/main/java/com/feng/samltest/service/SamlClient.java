@@ -134,6 +134,9 @@ public class SamlClient {
         this.notBeforeSkew = notBeforeSkew;
     }
 
+    public SamlClient() {
+    }
+
     /**
      * 使用显式参数构造 SAML 客户端
      *
@@ -507,7 +510,7 @@ public class SamlClient {
      * @param privateKey the private key
      * @throws SamlException if publicKey and privateKey don't form a valid credential
      */
-    private BasicX509Credential generateBasicX509Credential(String publicKey, String privateKey) throws SamlException {
+    public BasicX509Credential generateBasicX509Credential(String publicKey, String privateKey) throws SamlException {
         if (publicKey == null || privateKey == null) {
             throw new SamlException("Saml No credentials provided");
         }
@@ -845,7 +848,7 @@ public class SamlClient {
      *
      * @param filename The path of the certificate
      */
-    private X509Certificate loadCertificate(String filename) throws SamlException {
+    public X509Certificate loadCertificate(String filename) throws SamlException {
         try (FileInputStream fis = new FileInputStream(filename);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
 
