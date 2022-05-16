@@ -669,8 +669,10 @@ public class SamlClient {
     public String getLogoutRequest(String nameId) throws SamlException {
         // 构建一个登出 request
         LogoutRequest request = (LogoutRequest) getBasicSamlRequest(LogoutRequest.DEFAULT_ELEMENT_NAME);
+        request.setDestination(identityProviderUrl);
         // 构建nameId
         NameID nid = (NameID) buildSamlObject(NameID.DEFAULT_ELEMENT_NAME);
+//        nid.setFormat(UN_SPECIFIED.getFormat());
         nid.setValue(nameId);
         request.setNameID(nid);
         // 加签

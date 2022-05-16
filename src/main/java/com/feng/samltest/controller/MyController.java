@@ -1,16 +1,20 @@
 package com.feng.samltest.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.feng.samltest.constant.NameIdFormatsEnum;
 import com.feng.samltest.exception.SamlException;
 import com.feng.samltest.service.SamlClient;
 import com.feng.samltest.sp.Saml2Settings;
 import com.feng.samltest.sp.SettingsBuilder;
 import com.feng.samltest.util.SamlXmlTool;
+import com.feng.samltest.vo.SpMetadataVo;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -90,5 +94,24 @@ public class MyController {
         X509Certificate x509Certificate = new SamlClient().loadCertificate(file);
         settings.setSpX509cert(x509Certificate);
         return settings.getSPMetadata();
+    }
+
+    @GetMapping
+    @ResponseBody
+    public String requetParamTest(@RequestParam("redirectUrl") String redirectUrl, String a) {
+        return String.format("%s---------%s", redirectUrl, a);
+    }
+
+    @PostMapping
+    @ResponseBody
+    public String haha(SpMetadataVo vo,
+                       HttpServletRequest request,
+                       @RequestHeader(value = "xxx") String xxx,
+                       @RequestHeader(value = "User-Agent") String userAgent,
+                       @CookieValue(name = "zzz")String zzz) {
+        System.out.println(xxx);
+        System.out.println(zzz);
+        System.out.println(userAgent);
+        return String.format("%s---------%s", JSON.toJSONString(vo), JSON.toJSONString(request.getHeaderNames()));
     }
 }
