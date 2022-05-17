@@ -13,6 +13,8 @@ import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -61,9 +64,12 @@ public class KeyCloakTest {
 //                getXml("federation_metadata_new.xml"),
                 HTTP_POST,
                 null);
-        client.setSPKeys(
-                this.getClass().getResource("/saml-public-key-supos.crt").getFile(),
-                this.getClass().getResource("/saml-private-key-supos.pk8").getFile());
+//
+//        client.setSPKeys(
+//                this.getClass().getResource("/saml-public-key-supos.crt").getFile(),
+//                this.getClass().getResource("/saml-private-key-supos.pk8").getFile());
+
+        client.setSPKeysNew("classpath:saml-public-key-supos.crt","classpath:saml-private-key-supos.pk8");
         String samlRequest = client.getSamlRequest(UN_SPECIFIED);
         System.out.println(samlRequest);
         //todo MyController.login
@@ -296,4 +302,18 @@ public class KeyCloakTest {
         assertEquals("test@test.tld", response.getNameID());
     }
 
+
+    /**
+     * 测试获取 resource 目录下的文件资源
+     */
+    @Test
+    public void getResource() throws IOException {
+
+        String file = this.getClass().getResource("/saml-public-key-supos.crt").getFile();
+        System.out.println(file);
+
+        InputStream file2 = this.getClass().getClassLoader().getResourceAsStream("classpath:saml-public-key-supos.crt");
+        InputStreamReader reader = new InputStreamReader(file2);
+        System.out.println(file2);
+    }
 }

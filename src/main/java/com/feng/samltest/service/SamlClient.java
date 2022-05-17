@@ -58,6 +58,7 @@ import org.opensaml.xmlsec.signature.impl.SignatureBuilder;
 import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 import org.opensaml.xmlsec.signature.support.SignatureSupport;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -499,8 +500,13 @@ public class SamlClient {
      * @param privateKey the private key
      * @throws SamlException if publicKey and privateKey don't form a valid credential
      */
+    @Deprecated
     public void setSPKeys(String publicKey, String privateKey) throws SamlException {
         this.spCredential = generateBasicX509Credential(publicKey, privateKey);
+    }
+
+    public void setSPKeysNew(String publicKey, String privateKey) throws SamlException {
+        this.spCredential = generateBasicX509CredentialNew(publicKey, privateKey);
     }
 
     /**
@@ -510,12 +516,22 @@ public class SamlClient {
      * @param privateKey the private key
      * @throws SamlException if publicKey and privateKey don't form a valid credential
      */
+    @Deprecated
     public BasicX509Credential generateBasicX509Credential(String publicKey, String privateKey) throws SamlException {
         if (publicKey == null || privateKey == null) {
             throw new SamlException("Saml No credentials provided");
         }
         PrivateKey pk = loadPrivateKey(privateKey);
         X509Certificate cert = loadCertificate(publicKey);
+        return new BasicX509Credential(cert, pk);
+    }
+
+    public BasicX509Credential generateBasicX509CredentialNew(String publicKey, String privateKey) throws SamlException {
+        if (publicKey == null || privateKey == null) {
+            throw new SamlException("Saml No credentials provided");
+        }
+        PrivateKey pk = loadPrivateKeyNew(privateKey);
+        X509Certificate cert = loadCertificateNew(publicKey);
         return new BasicX509Credential(cert, pk);
     }
 
@@ -540,17 +556,11 @@ public class SamlClient {
      * @param privateKey the private key
      * @throws SamlException if publicKey and privateKey don't form a valid credential
      */
+    @Deprecated
     public void addAdditionalSPKey(String publicKey, String privateKey) throws SamlException {
         additionalSpCredentials.add(generateBasicX509Credential(publicKey, privateKey));
     }
 
-    /**
-     * Add an additional service provider certificate/key pair for decryption.
-     *
-     * @param certificate the certificate
-     * @param privateKey  the private key
-     * @throws SamlException if publicKey and privateKey don't form a valid credential
-     */
     public void addAdditionalSPKey(X509Certificate certificate, PrivateKey privateKey) throws SamlException {
         additionalSpCredentials.add(new BasicX509Credential(certificate, privateKey));
     }
@@ -850,6 +860,7 @@ public class SamlClient {
      *
      * @param filename The path of the certificate
      */
+    @Deprecated
     public X509Certificate loadCertificate(String filename) throws SamlException {
         try (FileInputStream fis = new FileInputStream(filename);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
@@ -865,16 +876,47 @@ public class SamlClient {
         }
     }
 
+    public X509Certificate loadCertificateNew(String fileName) throws SamlException {
+        try (InputStream inputStream = new DefaultResourceLoader().getResource(fileName).getInputStream()) {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) cf.generateCertificate(inputStream);
+
+        } catch (FileNotFoundException e) {
+            throw new SamlException("Saml Private key file doesn't exist", e);
+        } catch (Exception e) {
+            throw new SamlException("Saml Couldn't load private key", e);
+        }
+    }
+
     /**
      * Load a PKCS8 key
      *
      * @param filename The path of the key
      */
+    @Deprecated
     private PrivateKey loadPrivateKey(String filename) throws SamlException {
         try (RandomAccessFile raf = new RandomAccessFile(filename, "r")) {
             byte[] buf = new byte[(int) raf.length()];
             raf.readFully(buf);
             PKCS8EncodedKeySpec kspec = new PKCS8EncodedKeySpec(buf);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+
+            return kf.generatePrivate(kspec);
+
+        } catch (FileNotFoundException e) {
+            throw new SamlException("Saml Private key file doesn't exist", e);
+        } catch (Exception e) {
+            throw new SamlException("Saml Couldn't load private key", e);
+        }
+    }
+
+    /**
+     * Load a PKCS8 key
+     */
+    private PrivateKey loadPrivateKeyNew(String fileName) throws SamlException {
+        try (InputStream inputStream = new DefaultResourceLoader().getResource(fileName).getInputStream()) {
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+            PKCS8EncodedKeySpec kspec = new PKCS8EncodedKeySpec(bytes);
             KeyFactory kf = KeyFactory.getInstance("RSA");
 
             return kf.generatePrivate(kspec);
