@@ -20,6 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import sun.misc.BASE64Encoder;
+import sun.security.x509.X509CertImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,12 +29,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.feng.samltest.constant.NameIdFormatsEnum.PERSISTENT;
 import static com.feng.samltest.constant.NameIdFormatsEnum.UN_SPECIFIED;
@@ -263,6 +264,25 @@ public class KeyCloakTest {
 //        Certificate crt = cf.generateCertificate(KeyCloakTest.class.getResourceAsStream("/hub.crt"));
 
 //        String certEntry = "MIIDOjCCAiICCQCtLHB2cn4VMDANBgkqhkiG9w0BAQsFADBfMQswCQYDVQQGEwJERTEMMAoGA1UECAwDTlJXMREwDwYDVQQHDAhNdWVuc3RlcjEhMB8GA1UECgwYQ29uc2Vuc2UgQ29uc3VsdGluZyBHbWJIMQwwCgYDVQQLDANERVYwHhcNMTgwODE0MTIxNDQ0WhcNMTkwODE0MTIxNDQ0WjBfMQswCQYDVQQGEwJERTEMMAoGA1UECAwDTlJXMREwDwYDVQQHDAhNdWVuc3RlcjEhMB8GA1UECgwYQ29uc2Vuc2UgQ29uc3VsdGluZyBHbWJIMQwwCgYDVQQLDANERVYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyjtdIj9k2/DqkuybQ6XfAhuSXxHtPVG3axlix4bfNMLUt4DdmU5CchjZ++uutm7S4o1JzIjZjU3tw3q7139urtoecoLgqmd33ShEyQSK0IQ5Bghvzwm4FYYVuGJfxfBm1cAGW5r6AMnAwhID4XyoTt1JPeci6F1OUDwZ7z1uGZlTDlE+cnB0r1yxXeniUIpjmy1owgsroOO9Buz4bWBrPNiSUvAGSNSUdndIa2/VD+++DvSdiAOCuFBMl7ULT0+izeXzXATfeQE5A5DR8stpipr8hBbWCPKSGLr7a0dhyMVCQtgClL8YFcBU9lxN/LKhucGCjdcYoLTnz6keH67LrAgMBAAEwDQYJKoZIhvcNAQELBQADggEBACgUFTyNT25wDMxhN55IBNpTfnM3rN9n9Tek+ELstfc1waVUfnTtTiu0yYO/c04zhKmYJaAk70FKZJQKIEMkm95P5q2I91jIGMOhbb/mD/vB/iTtr5SXXearCFxdQJK5DiE3fuPT43zjCUuYLrMUFYakWACFnziHYlkO1bKuCpTkhobRlRxEb5MmJ/QUNuuE9KWrT0l8mWSydFKfdrAT04v52tNtxLexEYkZBOLHs00t2No4G+gdYbv4Kx2inm9ejvGvWSNyLDtbds4zO7V4W5Sjg4HMzvgw8sho7ajHEowR34IMY4mVXvyEve/GylOA0D22DNTGCqvcoWfVI0sItUI=";
+        Certificate cert = getHubXmlCert();
+
+        ArrayList<X509Certificate> certificates = new ArrayList<>();
+        certificates.add((X509Certificate) cert);
+
+        SamlClient client =
+                SamlClient.fromMetadata(
+                        "myidentifier",
+                        "http://some/url",
+                        getXml("hub.xml"),
+                        SamlBindingEnum.HTTP_POST,
+                        certificates);
+        client.setDateTimeNow(ASSERTION_DATE_HUB);
+        SamlResponse response = client.decodeAndValidateSamlResponse(AN_ENCODED_RESPONSE_HUB, "POST");
+        System.out.println(response.getNameID());
+        assertEquals("test@test.tld", response.getNameID());
+    }
+
+    private Certificate getHubXmlCert() throws CertificateException {
         String certEntry = "-----BEGIN CERTIFICATE-----\n" +
                 "MIIDOjCCAiICCQCtLHB2cn4VMDANBgkqhkiG9w0BAQsFADBfMQswCQYDVQQGEwJE\n" +
                 "RTEMMAoGA1UECAwDTlJXMREwDwYDVQQHDAhNdWVuc3RlcjEhMB8GA1UECgwYQ29u\n" +
@@ -283,25 +303,38 @@ public class KeyCloakTest {
                 "WSNyLDtbds4zO7V4W5Sjg4HMzvgw8sho7ajHEowR34IMY4mVXvyEve/GylOA0D22\n" +
                 "DNTGCqvcoWfVI0sItUI=\n" +
                 "-----END CERTIFICATE-----";
-        Certificate cert = SamlXmlTool.getCertificate(certEntry);
-
-        ArrayList<X509Certificate> certificates = new ArrayList<>();
-
-        certificates.add((X509Certificate) cert);
-
-        SamlClient client =
-                SamlClient.fromMetadata(
-                        "myidentifier",
-                        "http://some/url",
-                        getXml("hub.xml"),
-                        SamlBindingEnum.HTTP_POST,
-                        certificates);
-        client.setDateTimeNow(ASSERTION_DATE_HUB);
-        SamlResponse response = client.decodeAndValidateSamlResponse(AN_ENCODED_RESPONSE_HUB, "POST");
-        System.out.println(response.getNameID());
-        assertEquals("test@test.tld", response.getNameID());
+        return SamlXmlTool.getCertificate(certEntry);
     }
 
+
+    /**
+     * 测试证书转字符串是否异常
+     */
+    @Test
+    public void testCrtConvertString() throws Throwable {
+        // 从idp文件中取出的签名证书
+        String newCert = "MIICmTCCAYECBgF0C8a8ojANBgkqhkiG9w0BAQsFADAQMQ4wDAYDVQQDDAVzdXBvczAeFw0yMDA4MjAxMjA4MjdaFw0zMDA4MjAxMjEwMDdaMBAxDjAMBgNVBAMMBXN1cG9zMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCfnbCOLVBfRH4NqxpP6IdYDDFCgH5X4y0VGrOlFwNtycJTbciRFMOj2rzUatEs00WH7uUiPX13LIunQRiqrftg2J+m0yK84D3UB22RUPsMLHtpa6bIJbjMiS1WeezPgyPVgvv4CZZHiZW3aq70IKjW37RkwLgsPgyECQBB9ChPDtEGAckkD+AtLduaTq11mc4mFC597B2dpU1QO3Ogupd/h/KGIu2TiXGKIYLxxkqoXsswAponSFmE8b8h3XrP66t4TbhfaU3NO/lUbv3Dl2KktQkqcwzzTgytby+cQRKoIkn/rpu+7qmFsw+1GkJQnyUA1dtBCdL94Fy2cJrrTzJx";
+        Certificate certificate = SamlXmlTool.getCertificate(newCert);
+        List<X509Certificate> list = new ArrayList<>();
+        list.add((X509Certificate) certificate);
+        // 测试时，清空原idp文件中读取的证书
+        SamlClient client = SamlClient.fromMetadata(
+                "http://192.168.18.129:8080/xxx",
+                "http://192.168.18.129:8080/inter-api/auth/v1/third/authorize",
+                getXml("129IDPdescriptor.xml"),
+                HTTP_POST,
+                list);
+        client.setSPKeys(
+                this.getClass().getResource("/saml-public-key-supos.crt").getFile(),
+                this.getClass().getResource("/saml-private-key-supos.pk8").getFile());
+
+
+
+        String responseStr = "PHNhbWxwOkxvZ291dFJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6cHJvdG9jb2wiIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiB4bWxuczpzYW1sPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YXNzZXJ0aW9uIiBEZXN0aW5hdGlvbj0iaHR0cDovLzE5Mi4xNjguMTguMTI5OjgwODAvaW50ZXItYXBpL2F1dGgvbG9nb3V0IiBJRD0iSURfMzkyOWI0MDItMDJjMS00MGVjLWIxZWEtYjExZjIxNjJlYzA5IiBJblJlc3BvbnNlVG89InN1cG9zX2QzYWYzM2U3LWFlNjAtNDM0Mi1iZTc3LTQwYjhiOTQwMmQyNyIgSXNzdWVJbnN0YW50PSIyMDIyLTA1LTE1VDA0OjEyOjIwLjcwOFoiIFZlcnNpb249IjIuMCI+PElzc3Vlcj5odHRwOi8vMTkyLjE2OC4xOC4xMjk6ODA4MC9hdXRoL3JlYWxtcy9kdDwvSXNzdWVyPjxkc2lnOlNpZ25hdHVyZSB4bWxuczpkc2lnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIj48ZHNpZzpTaWduZWRJbmZvPjxkc2lnOkNhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzEwL3htbC1leGMtYzE0biMiLz48ZHNpZzpTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PGRzaWc6UmVmZXJlbmNlIFVSST0iI0lEXzM5MjliNDAyLTAyYzEtNDBlYy1iMWVhLWIxMWYyMTYyZWMwOSI+PGRzaWc6VHJhbnNmb3Jtcz48ZHNpZzpUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjZW52ZWxvcGVkLXNpZ25hdHVyZSIvPjxkc2lnOlRyYW5zZm9ybSBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMTAveG1sLWV4Yy1jMTRuIyIvPjwvZHNpZzpUcmFuc2Zvcm1zPjxkc2lnOkRpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxkc2lnOkRpZ2VzdFZhbHVlPjBHdEZETGw2Vzg1dllwN3JtRFhadkNYcEVUOERhWVE4ZGk1UGsyT1VYSGc9PC9kc2lnOkRpZ2VzdFZhbHVlPjwvZHNpZzpSZWZlcmVuY2U+PC9kc2lnOlNpZ25lZEluZm8+PGRzaWc6U2lnbmF0dXJlVmFsdWU+am1GbmZpTEt3Y3NPS3hjVDVJbFpuaXdEMWZ2L3hST1FqQVBZNHZuNWlEU01TaVFFUkJBYXloeDRHNVhxMEczUnpqQ0gxUnp5anl0b004OG1Fencxd3pUclRsM1I5VGtwL2MzYnpKdHNSOE4va1N3TEU0U0RtVFo0QkJlcWZSYUZzbXFEMGE2VXFkdEZCMWtsY1FvcmtoVkxoTU40SmtoY2FMa2hjL0tKQWFMSHRTcVlEY3RlbmxSbkVmNXRtZ2lwTU9YOTF0VzZTME9jbXVsZlRNV3BMNCtwYW9LYTFVTnFGT1pBbGtlR3hzaGk2OHZSRjd3dGpMVTlJL1ppa01FbXcybUtGakFzRXFpaGRBMUFoNlVSS2ZYVWF4d1RiNi9JdXVXQWhQSUkrVmQ1NU10K1o0WCtSVS8xNUZjM1ZwT1RGblVzWmJudnpIS3RoaGM2eTNQdXlnPT08L2RzaWc6U2lnbmF0dXJlVmFsdWU+PGRzaWc6S2V5SW5mbz48ZHNpZzpLZXlOYW1lPnB6WGl5dFhUdlVWbHphOWhQLW1lN0RRc0tteW9GTEtKYUd4TkcwRDN1Sk08L2RzaWc6S2V5TmFtZT48ZHNpZzpYNTA5RGF0YT48ZHNpZzpYNTA5Q2VydGlmaWNhdGU+TUlJQ21UQ0NBWUVDQmdGMEM4YThvakFOQmdrcWhraUc5dzBCQVFzRkFEQVFNUTR3REFZRFZRUUREQVZ6ZFhCdmN6QWVGdzB5TURBNE1qQXhNakE0TWpkYUZ3MHpNREE0TWpBeE1qRXdNRGRhTUJBeERqQU1CZ05WQkFNTUJYTjFjRzl6TUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF0a3ZvWHM3b0ZCYWVVUytJNkhhMVNGYno0b3dRUDRZWjBhZi91akRBajBCV2JIQmJHUVhiT3dTci9LdzZlRlB6eHoyQmZRVHZydGFBdEFvbzUvL1pTNlM4d3NHZlhud1Nra1h5TVlyeWUrT0pmc0NHSHYwRmZTYlN2ZnM2QWdwKzhFOUEvU2NCL2ZML2tNdnZWeHZyKzFMZVhyOEtjNFI1d295ZGFIdG80Q2pENml4N0piZmFxK1VWUzdSVDJURStUR0JqcGJjVWZ4Y2V5Z1ZhWDhsdDdzNDh6MGRjd2c4Z0pFazRNd0lWQ0M1aUE0NHRaUzNiWEJMQlVhWnN4NFZDNWRLKzRjNVBYTkRBRFdIWEtGMncrVTcwTW9CNXZTUjVSekFEV081c2xRZjJoM1Z0MkhiN2NGUGRoR0JvV3pyVGZtZHpSTStLaWk4YmZMeHJZcHoyV1FJREFRQUJNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUNmbmJDT0xWQmZSSDROcXhwUDZJZFlEREZDZ0g1WDR5MFZHck9sRndOdHljSlRiY2lSRk1PajJyelVhdEVzMDBXSDd1VWlQWDEzTEl1blFSaXFyZnRnMkorbTB5Szg0RDNVQjIyUlVQc01MSHRwYTZiSUpiak1pUzFXZWV6UGd5UFZndnY0Q1paSGlaVzNhcTcwSUtqVzM3Umt3TGdzUGd5RUNRQkI5Q2hQRHRFR0Fja2tEK0F0TGR1YVRxMTFtYzRtRkM1OTdCMmRwVTFRTzNPZ3VwZC9oL0tHSXUyVGlYR0tJWUx4eGtxb1hzc3dBcG9uU0ZtRThiOGgzWHJQNjZ0NFRiaGZhVTNOTy9sVWJ2M0RsMktrdFFrcWN3enpUZ3l0YnkrY1FSS29Ja24vcnB1KzdxbUZzdysxR2tKUW55VUExZHRCQ2RMOTRGeTJjSnJyVHpKeDwvZHNpZzpYNTA5Q2VydGlmaWNhdGU+PC9kc2lnOlg1MDlEYXRhPjxkc2lnOktleVZhbHVlPjxkc2lnOlJTQUtleVZhbHVlPjxkc2lnOk1vZHVsdXM+dGt2b1hzN29GQmFlVVMrSTZIYTFTRmJ6NG93UVA0WVowYWYvdWpEQWowQldiSEJiR1FYYk93U3IvS3c2ZUZQenh6MkJmUVR2cnRhQXRBb281Ly9aUzZTOHdzR2ZYbndTa2tYeU1ZcnllK09KZnNDR0h2MEZmU2JTdmZzNkFncCs4RTlBL1NjQi9mTC9rTXZ2Vnh2cisxTGVYcjhLYzRSNXdveWRhSHRvNENqRDZpeDdKYmZhcStVVlM3UlQyVEUrVEdCanBiY1VmeGNleWdWYVg4bHQ3czQ4ejBkY3dnOGdKRWs0TXdJVkNDNWlBNDR0WlMzYlhCTEJVYVpzeDRWQzVkSys0YzVQWE5EQURXSFhLRjJ3K1U3ME1vQjV2U1I1UnpBRFdPNXNsUWYyaDNWdDJIYjdjRlBkaEdCb1d6clRmbWR6Uk0rS2lpOGJmTHhyWXB6MldRPT08L2RzaWc6TW9kdWx1cz48ZHNpZzpFeHBvbmVudD5BUUFCPC9kc2lnOkV4cG9uZW50PjwvZHNpZzpSU0FLZXlWYWx1ZT48L2RzaWc6S2V5VmFsdWU+PC9kc2lnOktleUluZm8+PC9kc2lnOlNpZ25hdHVyZT48c2FtbHA6U3RhdHVzPjxzYW1scDpTdGF0dXNDb2RlIFZhbHVlPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6c3RhdHVzOlN1Y2Nlc3MiLz48L3NhbWxwOlN0YXR1cz48L3NhbWxwOkxvZ291dFJlc3BvbnNlPg==";
+        SamlLogoutResponse response = client.decodeAndValidateSamlLogoutResponse(responseStr, "POST");
+        boolean valid = response.isValid();
+        System.out.println(valid);
+    }
 
     /**
      * 测试获取 resource 目录下的文件资源

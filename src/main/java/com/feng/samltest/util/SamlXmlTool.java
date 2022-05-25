@@ -1695,7 +1695,7 @@ public final class SamlXmlTool {
                 .replace("-----END CERTIFICATE-----", "")
                 .replace("\n", "");
         java.util.Base64.Decoder decoder = java.util.Base64.getDecoder();
-        byte[] decodedData = decoder.decode(crtString);
+        byte[] decodedData = decoder.decode(crtString.getBytes(StandardCharsets.UTF_8));
         InputStream inputStream = new ByteArrayInputStream(decodedData);
 
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
